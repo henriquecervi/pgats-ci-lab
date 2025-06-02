@@ -22,10 +22,12 @@ jobs:
     # passos do script de build
     steps:
     # clone do projeto
+      - uses: actions/checkout@v4
+
     # instalação do node
       - uses: actions/checkout@v4
         with:
-          node-version: 22.x
+          node-version: latest
 
     # instalação do yarn
       - name: Instalando Yarn
