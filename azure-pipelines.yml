@@ -33,17 +33,17 @@
 #     steps:
 #     - checkout: self
 #       displayName: 'Checkout do código'
-      
+
 #     - task: NodeTool@0
 #       displayName: 'Instalar Node.js'
 #       inputs:
 #         versionSpec: $(nodeVersion)
-        
+
 #     - script: |
 #         npm install -g yarn
 #         yarn install --frozen-lockfile
 #       displayName: 'Instalar dependências'
-      
+
 #     - script: |
 #         yarn playwright install --with-deps
 #       displayName: 'Instalar navegadores Playwright'
@@ -81,14 +81,14 @@
 #         yarn install --frozen-lockfile
 #         yarn run test
 #       displayName: 'Executar testes unitários'
-      
+
 #     - task: PublishTestResults@2
 #       displayName: 'Publicar resultados dos testes'
 #       condition: always()
 #       inputs:
 #         testResultsFormat: 'JUnit'
 #         testResultsFiles: 'results.xml'
-        
+
 #     - task: PublishCodeCoverageResults@1
 #       displayName: 'Publicar cobertura de código'
 #       condition: always()
@@ -116,7 +116,7 @@
 #         yarn run test:mutation
 #       displayName: 'Executar testes de mutação'
 #       continueOnError: true
-      
+
 #     - publish: 'reports/mutation'
 #       artifact: 'mutation-report'
 #       displayName: 'Publicar relatório de mutação'
@@ -139,19 +139,19 @@
 #         yarn playwright install --with-deps
 #         yarn run e2e
 #       displayName: 'Executar testes E2E'
-      
+
 #     - task: PublishTestResults@2
 #       displayName: 'Publicar resultados E2E'
 #       condition: always()
 #       inputs:
 #         testResultsFormat: 'JUnit'
 #         testResultsFiles: 'test-results/results.xml'
-        
+
 #     - publish: 'playwright-report'
 #       artifact: 'playwright-report'
 #       displayName: 'Publicar relatório Playwright'
 #       condition: always()
-      
+
 #     - publish: 'test-results'
 #       artifact: 'test-results'
 #       displayName: 'Publicar artefatos de teste'
@@ -159,7 +159,7 @@
 
 # - stage: BuildAndDeploy
 #   displayName: 'Build e Deploy'
-#   dependsOn: 
+#   dependsOn:
 #     - UnitTests
 #     - E2ETests
 #   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
@@ -175,7 +175,7 @@
 #         npm install -g yarn
 #         yarn install --frozen-lockfile
 #       displayName: 'Instalar dependências'
-      
+
 #     - script: |
 #         echo "Preparando build da aplicação RoboCoasters..."
 #         mkdir -p dist
@@ -186,14 +186,14 @@
 #         cp favicon.ico dist/ || true
 #         ls -la dist/
 #       displayName: 'Build da aplicação'
-      
+
 #     - publish: 'dist'
 #       artifact: 'webapp'
 #       displayName: 'Publicar artefatos da aplicação'
 
 # - stage: Reports
 #   displayName: 'Consolidação de Relatórios'
-#   dependsOn: 
+#   dependsOn:
 #     - UnitTests
 #     - E2ETests
 #     - MutationTests
@@ -211,4 +211,4 @@
 #         echo "Data: $(System.DateTime)"
 #         echo "Projeto: RoboCoasters - Futuristic Parks"
 #         echo "====================================="
-#       displayName: 'Resumo da execução' 
+#       displayName: 'Resumo da execução'
