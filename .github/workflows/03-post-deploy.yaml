@@ -10,7 +10,7 @@ name: 'Execução por Deploy'
 
 on:
   workflow_run:
-    workflows: ['Execução Manual']
+    workflows: ['Execução Manual'] # nome do workflow que vai disparar este pipe
     types:
       - completed
 
