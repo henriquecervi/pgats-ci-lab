@@ -1,214 +1,214 @@
-# Azure DevOps Pipeline para PGATS - CI Lab
-trigger:
-  branches:
-    include:
-      - main
+# # Azure DevOps Pipeline para PGATS - CI Lab
+# trigger:
+#   branches:
+#     include:
+#       - main
 
-pr:
-  branches:
-    include:
-      - main
+# pr:
+#   branches:
+#     include:
+#       - main
 
-# Agendamento opcional (executar diariamente às 02:00 UTC)
-schedules:
-- cron: "0 2 * * *"
-  displayName: Daily Build
-  branches:
-    include:
-    - main
-  always: true
+# # Agendamento opcional (executar diariamente às 02:00 UTC)
+# schedules:
+# - cron: "0 2 * * *"
+#   displayName: Daily Build
+#   branches:
+#     include:
+#     - main
+#   always: true
 
-variables:
-  nodeVersion: '18.x'
+# variables:
+#   nodeVersion: '18.x'
 
-pool:
-  vmImage: 'ubuntu-latest'
+# pool:
+#   vmImage: 'ubuntu-latest'
 
-stages:
-- stage: Setup
-  displayName: 'Setup e Preparação'
-  jobs:
-  - job: InstallDependencies
-    displayName: 'Instalar Dependências'
-    steps:
-    - checkout: self
-      displayName: 'Checkout do código'
+# stages:
+# - stage: Setup
+#   displayName: 'Setup e Preparação'
+#   jobs:
+#   - job: InstallDependencies
+#     displayName: 'Instalar Dependências'
+#     steps:
+#     - checkout: self
+#       displayName: 'Checkout do código'
       
-    - task: NodeTool@0
-      displayName: 'Instalar Node.js'
-      inputs:
-        versionSpec: $(nodeVersion)
+#     - task: NodeTool@0
+#       displayName: 'Instalar Node.js'
+#       inputs:
+#         versionSpec: $(nodeVersion)
         
-    - script: |
-        npm install -g yarn
-        yarn install --frozen-lockfile
-      displayName: 'Instalar dependências'
+#     - script: |
+#         npm install -g yarn
+#         yarn install --frozen-lockfile
+#       displayName: 'Instalar dependências'
       
-    - script: |
-        yarn playwright install --with-deps
-      displayName: 'Instalar navegadores Playwright'
+#     - script: |
+#         yarn playwright install --with-deps
+#       displayName: 'Instalar navegadores Playwright'
 
-- stage: QualityCheck
-  displayName: 'Verificação de Qualidade'
-  dependsOn: Setup
-  jobs:
-  - job: Linting
-    displayName: 'Linting e Formatação'
-    steps:
-    - checkout: self
-    - task: NodeTool@0
-      inputs:
-        versionSpec: $(nodeVersion)
-    - script: |
-        npm install -g yarn
-        yarn install --frozen-lockfile
-        yarn run lint || true
-      displayName: 'Executar verificações de código'
+# - stage: QualityCheck
+#   displayName: 'Verificação de Qualidade'
+#   dependsOn: Setup
+#   jobs:
+#   - job: Linting
+#     displayName: 'Linting e Formatação'
+#     steps:
+#     - checkout: self
+#     - task: NodeTool@0
+#       inputs:
+#         versionSpec: $(nodeVersion)
+#     - script: |
+#         npm install -g yarn
+#         yarn install --frozen-lockfile
+#         yarn run lint || true
+#       displayName: 'Executar verificações de código'
 
-- stage: UnitTests
-  displayName: 'Testes Unitários'
-  dependsOn: Setup
-  jobs:
-  - job: RunUnitTests
-    displayName: 'Executar Testes Unitários'
-    steps:
-    - checkout: self
-    - task: NodeTool@0
-      inputs:
-        versionSpec: $(nodeVersion)
-    - script: |
-        npm install -g yarn
-        yarn install --frozen-lockfile
-        yarn run test
-      displayName: 'Executar testes unitários'
+# - stage: UnitTests
+#   displayName: 'Testes Unitários'
+#   dependsOn: Setup
+#   jobs:
+#   - job: RunUnitTests
+#     displayName: 'Executar Testes Unitários'
+#     steps:
+#     - checkout: self
+#     - task: NodeTool@0
+#       inputs:
+#         versionSpec: $(nodeVersion)
+#     - script: |
+#         npm install -g yarn
+#         yarn install --frozen-lockfile
+#         yarn run test
+#       displayName: 'Executar testes unitários'
       
-    - task: PublishTestResults@2
-      displayName: 'Publicar resultados dos testes'
-      condition: always()
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'results.xml'
+#     - task: PublishTestResults@2
+#       displayName: 'Publicar resultados dos testes'
+#       condition: always()
+#       inputs:
+#         testResultsFormat: 'JUnit'
+#         testResultsFiles: 'results.xml'
         
-    - task: PublishCodeCoverageResults@1
-      displayName: 'Publicar cobertura de código'
-      condition: always()
-      inputs:
-        codeCoverageTool: 'Cobertura'
-        summaryFileLocation: 'reports/coverage/cobertura-coverage.xml'
-        reportDirectory: 'reports/coverage/lcov-report'
-        failIfCoverageEmpty: false
+#     - task: PublishCodeCoverageResults@1
+#       displayName: 'Publicar cobertura de código'
+#       condition: always()
+#       inputs:
+#         codeCoverageTool: 'Cobertura'
+#         summaryFileLocation: 'reports/coverage/cobertura-coverage.xml'
+#         reportDirectory: 'reports/coverage/lcov-report'
+#         failIfCoverageEmpty: false
 
-- stage: MutationTests
-  displayName: 'Testes de Mutação'
-  dependsOn: UnitTests
-  jobs:
-  - job: RunMutationTests
-    displayName: 'Executar Testes de Mutação'
-    timeoutInMinutes: 30
-    steps:
-    - checkout: self
-    - task: NodeTool@0
-      inputs:
-        versionSpec: $(nodeVersion)
-    - script: |
-        npm install -g yarn
-        yarn install --frozen-lockfile
-        yarn run test:mutation
-      displayName: 'Executar testes de mutação'
-      continueOnError: true
+# - stage: MutationTests
+#   displayName: 'Testes de Mutação'
+#   dependsOn: UnitTests
+#   jobs:
+#   - job: RunMutationTests
+#     displayName: 'Executar Testes de Mutação'
+#     timeoutInMinutes: 30
+#     steps:
+#     - checkout: self
+#     - task: NodeTool@0
+#       inputs:
+#         versionSpec: $(nodeVersion)
+#     - script: |
+#         npm install -g yarn
+#         yarn install --frozen-lockfile
+#         yarn run test:mutation
+#       displayName: 'Executar testes de mutação'
+#       continueOnError: true
       
-    - publish: 'reports/mutation'
-      artifact: 'mutation-report'
-      displayName: 'Publicar relatório de mutação'
-      condition: always()
+#     - publish: 'reports/mutation'
+#       artifact: 'mutation-report'
+#       displayName: 'Publicar relatório de mutação'
+#       condition: always()
 
-- stage: E2ETests
-  displayName: 'Testes End-to-End'
-  dependsOn: Setup
-  jobs:
-  - job: RunE2ETests
-    displayName: 'Executar Testes E2E'
-    steps:
-    - checkout: self
-    - task: NodeTool@0
-      inputs:
-        versionSpec: $(nodeVersion)
-    - script: |
-        npm install -g yarn
-        yarn install --frozen-lockfile
-        yarn playwright install --with-deps
-        yarn run e2e
-      displayName: 'Executar testes E2E'
+# - stage: E2ETests
+#   displayName: 'Testes End-to-End'
+#   dependsOn: Setup
+#   jobs:
+#   - job: RunE2ETests
+#     displayName: 'Executar Testes E2E'
+#     steps:
+#     - checkout: self
+#     - task: NodeTool@0
+#       inputs:
+#         versionSpec: $(nodeVersion)
+#     - script: |
+#         npm install -g yarn
+#         yarn install --frozen-lockfile
+#         yarn playwright install --with-deps
+#         yarn run e2e
+#       displayName: 'Executar testes E2E'
       
-    - task: PublishTestResults@2
-      displayName: 'Publicar resultados E2E'
-      condition: always()
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'test-results/results.xml'
+#     - task: PublishTestResults@2
+#       displayName: 'Publicar resultados E2E'
+#       condition: always()
+#       inputs:
+#         testResultsFormat: 'JUnit'
+#         testResultsFiles: 'test-results/results.xml'
         
-    - publish: 'playwright-report'
-      artifact: 'playwright-report'
-      displayName: 'Publicar relatório Playwright'
-      condition: always()
+#     - publish: 'playwright-report'
+#       artifact: 'playwright-report'
+#       displayName: 'Publicar relatório Playwright'
+#       condition: always()
       
-    - publish: 'test-results'
-      artifact: 'test-results'
-      displayName: 'Publicar artefatos de teste'
-      condition: always()
+#     - publish: 'test-results'
+#       artifact: 'test-results'
+#       displayName: 'Publicar artefatos de teste'
+#       condition: always()
 
-- stage: BuildAndDeploy
-  displayName: 'Build e Deploy'
-  dependsOn: 
-    - UnitTests
-    - E2ETests
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
-  jobs:
-  - job: Build
-    displayName: 'Build da Aplicação'
-    steps:
-    - checkout: self
-    - task: NodeTool@0
-      inputs:
-        versionSpec: $(nodeVersion)
-    - script: |
-        npm install -g yarn
-        yarn install --frozen-lockfile
-      displayName: 'Instalar dependências'
+# - stage: BuildAndDeploy
+#   displayName: 'Build e Deploy'
+#   dependsOn: 
+#     - UnitTests
+#     - E2ETests
+#   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+#   jobs:
+#   - job: Build
+#     displayName: 'Build da Aplicação'
+#     steps:
+#     - checkout: self
+#     - task: NodeTool@0
+#       inputs:
+#         versionSpec: $(nodeVersion)
+#     - script: |
+#         npm install -g yarn
+#         yarn install --frozen-lockfile
+#       displayName: 'Instalar dependências'
       
-    - script: |
-        echo "Preparando build da aplicação RoboCoasters..."
-        mkdir -p dist
-        cp -r css dist/ || true
-        cp -r src dist/ || true
-        cp -r img dist/ || true
-        cp index.html dist/ || true
-        cp favicon.ico dist/ || true
-        ls -la dist/
-      displayName: 'Build da aplicação'
+#     - script: |
+#         echo "Preparando build da aplicação RoboCoasters..."
+#         mkdir -p dist
+#         cp -r css dist/ || true
+#         cp -r src dist/ || true
+#         cp -r img dist/ || true
+#         cp index.html dist/ || true
+#         cp favicon.ico dist/ || true
+#         ls -la dist/
+#       displayName: 'Build da aplicação'
       
-    - publish: 'dist'
-      artifact: 'webapp'
-      displayName: 'Publicar artefatos da aplicação'
+#     - publish: 'dist'
+#       artifact: 'webapp'
+#       displayName: 'Publicar artefatos da aplicação'
 
-- stage: Reports
-  displayName: 'Consolidação de Relatórios'
-  dependsOn: 
-    - UnitTests
-    - E2ETests
-    - MutationTests
-  condition: always()
-  jobs:
-  - job: ConsolidateReports
-    displayName: 'Consolidar Relatórios'
-    steps:
-    - checkout: self
-    - script: |
-        echo "=== RESUMO DA EXECUÇÃO PGATS-CI ==="
-        echo "Build: $(Build.BuildNumber)"
-        echo "Branch: $(Build.SourceBranchName)"
-        echo "Commit: $(Build.SourceVersion)"
-        echo "Data: $(System.DateTime)"
-        echo "Projeto: RoboCoasters - Futuristic Parks"
-        echo "====================================="
-      displayName: 'Resumo da execução' 
+# - stage: Reports
+#   displayName: 'Consolidação de Relatórios'
+#   dependsOn: 
+#     - UnitTests
+#     - E2ETests
+#     - MutationTests
+#   condition: always()
+#   jobs:
+#   - job: ConsolidateReports
+#     displayName: 'Consolidar Relatórios'
+#     steps:
+#     - checkout: self
+#     - script: |
+#         echo "=== RESUMO DA EXECUÇÃO PGATS-CI ==="
+#         echo "Build: $(Build.BuildNumber)"
+#         echo "Branch: $(Build.SourceBranchName)"
+#         echo "Commit: $(Build.SourceVersion)"
+#         echo "Data: $(System.DateTime)"
+#         echo "Projeto: RoboCoasters - Futuristic Parks"
+#         echo "====================================="
+#       displayName: 'Resumo da execução' 
